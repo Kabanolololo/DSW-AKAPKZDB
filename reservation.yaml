@@ -168,6 +168,184 @@ paths:
             schema:
               $ref: "#/components/schemas/Error"
 
+/appointments:
+  post:
+    summary: Add a new appointment
+    operationId: addAppointment
+    tags:
+      - Appointment
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Appointment"
+    responses:
+      "201":
+        description: Appointment added successfully
+      "400":
+        description: Invalid input. Missing or incorrect data.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      "404":
+        description: Patient or doctor not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+
+/appointments/{id}:
+  get:
+    summary: Get details of a specific appointment
+    operationId: getAppointmentDetails
+    tags:
+      - Appointment
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the appointment to retrieve details for
+        schema:
+          type: integer
+    responses:
+      "200":
+        description: Details of the appointment
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Appointment"
+      "404":
+        description: Appointment not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+  put:
+    summary: Edit details of an existing appointment
+    operationId: editAppointment
+    tags:
+      - Appointment
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the appointment to edit
+        schema:
+          type: integer
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Appointment"
+    responses:
+      "200":
+        description: Appointment updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Appointment"
+      "400":
+        description: Invalid request (e.g., invalid data format)
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      "404":
+        description: Appointment not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+
+/appointments/{id}:
+  delete:
+    summary: Cancel a specific appointment
+    operationId: cancelAppointment
+    tags:
+      - Appointment
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: The ID of the appointment to cancel
+        schema:
+          type: integer
+    responses:
+      "200":
+        description: Appointment cancelled successfully
+      "404":
+        description: Appointment not found
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+      "400":
+        description: Invalid request (e.g., the appointment could not be cancelled)
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Error"
+
+/auth/signup:
+  post:
+    summary: Register a new user
+    operationId: registerUser
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/User"
+    responses:
+      "201":
+        description: User created successfully
+      "400":
+        description: Invalid input (e.g., missing data, invalid email)
+
+/auth/login:
+  post:
+    summary: User login (Generate JWT)
+    operationId: loginUser
+    tags:
+      - Auth
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Login"
+    responses:
+      "200":
+        description: Login successful, returns JWT token
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Token"
+      "401":
+        description: Invalid credentials
+
+/auth/profile:
+  get:
+    summary: Get profile of logged-in user
+    operationId: getProfile
+    tags:
+      - Auth
+    security:
+      - bearerAuth: []
+    responses:
+      "200":
+        description: User profile data
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      "401":
+        description: Unauthorized (invalid or expired token)
 
 components:
   schemas:
@@ -251,3 +429,50 @@ components:
         code:
           type: integer
           example: 404
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Jan
+        surname:
+          type: string
+          example: Kowalski
+        email:
+          type: string
+          format: email
+          example: jan.kowalski@example.com
+        password:
+          type: string
+          example: SecurePassword123
+
+    Login:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: jan.kowalski@example.com
+        password:
+          type: string
+          example: SecurePassword123
+
+    Token:
+      type: object
+      properties:
+        access_token:
+          type: string
+          example: "JWT_TOKEN_HERE"
+        token_type:
+          type: string
+          example: "bearer"
+
+    securitySchemes:
+      bearerAuth:
+        type: http
+        scheme: bearer
+        bearerFormat: JWT
