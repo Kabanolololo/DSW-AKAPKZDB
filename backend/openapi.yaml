@@ -1,0 +1,857 @@
+openapi: 3.0.0
+info:
+  description: A simple API for managing patient appointments and doctor schedules.
+  title: Clinic Reservations API
+  version: 1.0.0
+servers:
+- description: Local development server
+  url: http://localhost:8000
+paths:
+  /patients:
+    post:
+      operationId: addPatient
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Patient'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: Patient added successfully
+      summary: Add a new patient
+      tags:
+      - Patient
+  /patients/{id}:
+    get:
+      operationId: getPatientId
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: Details of the patient
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Patient not found
+      summary: Get details of a specific patient
+      tags:
+      - Patient
+  /patients/{id}/appointments:
+    get:
+      operationId: getPatientHistory
+      parameters:
+      - description: The ID of the patient whose appointment history is to be retrieved
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Appointment'
+                type: array
+          description: List of all appointments for the patient
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Patient not found. The patient with the provided ID does not
+            exist in the system.
+      summary: Get all history of a patient
+      tags:
+      - Patient
+  /doctors:
+    get:
+      operationId: getAllDoctors
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Doctor'
+                type: array
+          description: A list of all doctors
+      summary: Retrieve a list of all doctors
+      tags:
+      - Doctor
+  /doctors/{id}:
+    get:
+      operationId: getDoctorId
+      parameters:
+      - description: The ID of the doctor whose details are to be retrieved
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: Details of the doctor
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Doctor not found
+      summary: Get details of a specific doctor
+      tags:
+      - Doctor
+  /doctors/{id}/available-slots:
+    get:
+      operationId: getDoctorAvailableSlots
+      parameters:
+      - description: The ID of the doctor whose available slots are to be retrieved
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: The date for which to retrieve available slots (format YYYY-MM-DD)
+        explode: true
+        in: query
+        name: date
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/getDoctorAvailableSlots_200_response_inner'
+                type: array
+          description: A list of available slots for the doctor on the given date
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Bad request due to incorrect date format or missing parameters
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Doctor or available slots not found
+      summary: Get available slots for a specific doctor on a given date
+      tags:
+      - Doctor
+  /appointments:
+    post:
+      operationId: addAppointment
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: Appointment added successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid input. Missing or incorrect data.
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Patient or doctor not found
+      summary: Add a new appointment
+      tags:
+      - Appointment
+  /appointments/{id}:
+    delete:
+      operationId: cancelAppointment
+      parameters:
+      - description: The ID of the appointment to cancel
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: Appointment cancelled successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: "Invalid request (e.g., the appointment could not be cancelled)"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Appointment not found
+      summary: Cancel a specific appointment
+      tags:
+      - Appointment
+    get:
+      operationId: getAppointmentDetails
+      parameters:
+      - description: The ID of the appointment to retrieve details for
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: Details of the appointment
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Appointment not found
+      summary: Get details of a specific appointment
+      tags:
+      - Appointment
+    put:
+      operationId: editAppointment
+      parameters:
+      - description: The ID of the appointment to edit
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Appointment'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: Appointment updated successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: "Invalid request (e.g., invalid data format)"
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Appointment not found
+      summary: Edit details of an existing appointment
+      tags:
+      - Appointment
+  /auth/signup:
+    post:
+      description: Allows a new user to register by providing their details.
+      operationId: registerUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User created successfully
+        "400":
+          description: "Invalid input (e.g., missing data, invalid email)"
+      summary: Register a new user
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      operationId: loginUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+          description: "Login successful, returns JWT token"
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid credentials
+      summary: User login (Generate JWT)
+      tags:
+      - Auth
+  /auth/profile:
+    get:
+      operationId: getProfile
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User profile data
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized. Token is missing or invalid.
+      security:
+      - bearerAuth: []
+      summary: Get profile of logged-in user
+      tags:
+      - Auth
+  /admin/patients:
+    get:
+      operationId: getAllPatients
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Patient'
+                type: array
+          description: A list of all patients
+        "401":
+          description: Unauthorized (invalid or expired token)
+      security:
+      - bearerAuth: []
+      summary: Get a list of all patients
+      tags:
+      - Admin
+  /admin/patients/{id}:
+    delete:
+      operationId: deletePatient
+      parameters:
+      - description: The ID of the patient to be deleted
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: Patient deleted successfully
+        "401":
+          description: Unauthorized (invalid or expired token)
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Patient not found
+      security:
+      - bearerAuth: []
+      summary: Delete a specific patient
+      tags:
+      - Admin
+    get:
+      operationId: getPatientDetails
+      parameters:
+      - description: The ID of the patient whose details are to be retrieved
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+          description: Details of the patient
+        "401":
+          description: Unauthorized (invalid or expired token)
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Patient not found
+      security:
+      - bearerAuth: []
+      summary: Get details of a specific patient
+      tags:
+      - Admin
+  /admin/doctors:
+    get:
+      operationId: getAllDoctorsAdmin
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Doctor'
+                type: array
+          description: List of all doctors
+        "401":
+          description: Unauthorized (invalid token)
+        "403":
+          description: Forbidden (insufficient permissions)
+      security:
+      - bearerAuth: []
+      summary: Get all doctors
+      tags:
+      - Admin
+    post:
+      operationId: addDoctor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Doctor'
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: Doctor added successfully
+        "400":
+          description: Validation error
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (insufficient permissions)
+      security:
+      - bearerAuth: []
+      summary: Add a new doctor
+      tags:
+      - Admin
+  /admin/doctors/{id}:
+    put:
+      operationId: editDoctor
+      parameters:
+      - description: ID lekarza do edytowania
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Doctor'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+          description: Doctor updated successfully
+        "400":
+          description: Błąd walidacji danych
+        "401":
+          description: Brak autoryzacji
+        "403":
+          description: Brak uprawnień do wykonania tej operacji
+        "404":
+          description: Lekarz o podanym ID nie został znaleziony
+      security:
+      - bearerAuth: []
+      summary: Edycja danych lekarza
+      tags:
+      - Admin
+  /admin/appointments:
+    get:
+      operationId: getAllAppointments
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Appointment'
+                type: array
+          description: Lista wszystkich wizyt
+        "401":
+          description: Brak autoryzacji
+        "403":
+          description: Brak uprawnień do wykonania tej operacji
+      security:
+      - bearerAuth: []
+      summary: Pobranie wszystkich wizyt
+      tags:
+      - Admin
+  /admin/appointments/{id}:
+    delete:
+      operationId: cancelAppointmentAdmin
+      parameters:
+      - description: ID of the appointment to cancel
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: Appointment cancelled successfully
+        "401":
+          description: Unauthorized (invalid token)
+        "403":
+          description: Forbidden (insufficient permissions)
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Appointment not found
+      security:
+      - bearerAuth: []
+      summary: Cancel an appointment
+      tags:
+      - Admin
+  /admin/appointments/{id}/reschedule:
+    put:
+      operationId: rescheduleAppointment
+      parameters:
+      - description: ID of the appointment to reschedule
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/rescheduleAppointment_request'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Appointment'
+          description: Appointment rescheduled successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: "Invalid input (e.g., past date or doctor unavailable)"
+        "401":
+          description: Unauthorized (invalid token)
+        "403":
+          description: Forbidden (insufficient permissions)
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Appointment not found
+      security:
+      - bearerAuth: []
+      summary: Reschedule an appointment
+      tags:
+      - Admin
+components:
+  schemas:
+    Patient:
+      example:
+        phone: "123456789"
+        surname: Kowalski
+        date_of_birth: 1985-03-25
+        name: Jan
+        id: 1
+        email: jan.kowalski@example.com
+      properties:
+        id:
+          example: 1
+          title: id
+          type: integer
+        name:
+          example: Jan
+          title: name
+          type: string
+        surname:
+          example: Kowalski
+          title: surname
+          type: string
+        date_of_birth:
+          example: 1985-03-25
+          format: date
+          title: date_of_birth
+          type: string
+        email:
+          example: jan.kowalski@example.com
+          format: email
+          title: email
+          type: string
+        phone:
+          example: "123456789"
+          title: phone
+          type: string
+      title: Patient
+      type: object
+    Doctor:
+      example:
+        phone: "987654321"
+        surname: Nowak
+        name: Anna
+        specialization: Cardiologist
+        id: 1
+        email: anna.nowak@clinic.com
+      properties:
+        id:
+          example: 1
+          title: id
+          type: integer
+        name:
+          example: Anna
+          title: name
+          type: string
+        surname:
+          example: Nowak
+          title: surname
+          type: string
+        specialization:
+          example: Cardiologist
+          title: specialization
+          type: string
+        email:
+          example: anna.nowak@clinic.com
+          format: email
+          title: email
+          type: string
+        phone:
+          example: "987654321"
+          title: phone
+          type: string
+      title: Doctor
+      type: object
+    Appointment:
+      example:
+        doctor_id: 1
+        patient_id: 1
+        appointment_date: 2025-03-20T14:00:00Z
+        id: 1
+        status: scheduled
+      properties:
+        id:
+          example: 1
+          title: id
+          type: integer
+        patient_id:
+          example: 1
+          title: patient_id
+          type: integer
+        doctor_id:
+          example: 1
+          title: doctor_id
+          type: integer
+        appointment_date:
+          example: 2025-03-20T14:00:00Z
+          format: date-time
+          title: appointment_date
+          type: string
+        status:
+          enum:
+          - scheduled
+          - completed
+          - cancelled
+          example: scheduled
+          title: status
+          type: string
+      title: Appointment
+      type: object
+    Error:
+      example:
+        code: 404
+        message: Patient not found
+      properties:
+        message:
+          example: Patient not found
+          title: message
+          type: string
+        code:
+          example: 404
+          title: code
+          type: integer
+      title: Error
+      type: object
+    User:
+      example:
+        password: SecurePassword123
+        surname: Kowalski
+        name: Jan
+        id: 1
+        email: jan.kowalski@example.com
+      properties:
+        id:
+          example: 1
+          title: id
+          type: integer
+        name:
+          example: Jan
+          title: name
+          type: string
+        surname:
+          example: Kowalski
+          title: surname
+          type: string
+        email:
+          example: jan.kowalski@example.com
+          format: email
+          title: email
+          type: string
+        password:
+          example: SecurePassword123
+          title: password
+          type: string
+      title: User
+      type: object
+    Login:
+      example:
+        password: SecurePassword123
+        email: jan.kowalski@example.com
+      properties:
+        email:
+          example: jan.kowalski@example.com
+          format: email
+          title: email
+          type: string
+        password:
+          example: SecurePassword123
+          title: password
+          type: string
+      title: Login
+      type: object
+    Token:
+      example:
+        access_token: JWT_TOKEN_HERE
+        token_type: bearer
+      properties:
+        access_token:
+          example: JWT_TOKEN_HERE
+          title: access_token
+          type: string
+        token_type:
+          example: bearer
+          title: token_type
+          type: string
+      title: Token
+      type: object
+    getDoctorAvailableSlots_200_response_inner:
+      example:
+        slot_id: 1
+        time: 2025-03-20T09:00:00Z
+        status: available
+      properties:
+        slot_id:
+          example: 1
+          title: slot_id
+          type: integer
+        time:
+          example: 2025-03-20T09:00:00Z
+          format: date-time
+          title: time
+          type: string
+        status:
+          enum:
+          - available
+          - booked
+          - unavailable
+          example: available
+          title: status
+          type: string
+      title: getDoctorAvailableSlots_200_response_inner
+      type: object
+    rescheduleAppointment_request:
+      properties:
+        new_date:
+          example: 2025-03-25T10:30:00Z
+          format: date-time
+          title: new_date
+          type: string
+      required:
+      - new_date
+      title: rescheduleAppointment_request
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
