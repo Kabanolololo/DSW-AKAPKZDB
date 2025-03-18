@@ -28,14 +28,23 @@ def create_user(db: Session, user: UserCreate):
             detail="An error occurred while creating the user"
         ) from e
 
-# Funkcja do pobierania użytkowników
-def get_users(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(User).offset(skip).limit(limit).all()
-
-# Funkcja do pobierania użytkownika po ID
+# Funkcja do wyśweitalnia konkretnego użytkownika        
 def get_user(db: Session, user_id: int):
-    return db.query(User).filter(User.id == user_id).first()
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None  # Obsłużymy to w `main.py`
+    return user
 
-# Funkcja do pobierania użytkownika po emailu
-def get_user_by_email(db: Session, email: str):
-    return db.query(User).filter(User.email == email).first()
+# Funkcja do aktualizacji użytkownika
+def update_user(db: Session, user_id: int, user_update: UserCreate):
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        return None
+
+    # Aktualizacja danych użytkownika
+    user.email = user_update.email
+    user.password = user_update.password
+
+    db.commit()
+    db.refresh(user)
+    return user

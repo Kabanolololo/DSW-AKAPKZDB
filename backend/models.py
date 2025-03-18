@@ -27,3 +27,4 @@ class Note(Base):
 
     # Relacja z użytkownikiem
     owner = relationship("User", back_populates="notes")
+
