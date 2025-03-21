@@ -1,4 +1,6 @@
-# Model kategorie 
+
+DO FILTORWANIA DANYCH:
+# Model kategorie
 class Categories(Base):
     __tablename__ = 'categories'
     
@@ -8,3 +10,9 @@ class Categories(Base):
 
     # Relacja z notatkami
     note = relationship("Note", back_populates="categories")
+do tego dodac endpointy z tym zwiazane
+
+LEPIEJ ZROBIC SCHEMATY
+
+UWIERZYTELNIANIE
+

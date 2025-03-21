@@ -9,7 +9,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgresql://user:password@db:5432/mydatabase
+      - DATABASE_URL=postgresql://postgres:Disney2002.@localhost:5432/clinic
 
   db:
     image: postgres:13

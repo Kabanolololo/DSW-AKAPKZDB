@@ -4,6 +4,7 @@ from models import User
 from schemas import UserCreate
 from models import Note
 from schemas import NoteCreate,NoteUpdate
+from auth import hash_password
 
 # Funkcja do tworzenia nowego użytkownika
 def create_user(db: Session, user: UserCreate):
@@ -15,8 +16,11 @@ def create_user(db: Session, user: UserCreate):
             detail="Email already registered"
         )
     
-    # Tworzymy nowego użytkownika
-    db_user = User(**user.dict())  # używamy .dict() zamiast .model_dump()
+    # Haszowanie hasła przed zapisaniem do bazy danych
+    hashed_password = hash_password(user.password)
+    
+    # Tworzymy nowego użytkownika z zahaszowanym hasłem
+    db_user = User(email=user.email, password=hashed_password)
 
     try:
         db.add(db_user)
