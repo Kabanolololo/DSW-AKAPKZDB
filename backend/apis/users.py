@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
-import crud
+import crud.user_crud as crud
 import schemas
 from apis.dependencies import get_db
 
