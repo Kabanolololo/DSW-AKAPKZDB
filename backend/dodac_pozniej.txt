@@ -1,0 +1,19 @@
+SOBOTA: LEPIEJ ZROBIC SCHEMATY
+NIEDZIELA: UWIERZYTELNIANIE
+
+PONIEDZIALEK DODAC DO FILTORWANIA DANYCH:
+# Model kategorie
+class Categories(Base):
+    __tablename__ = 'categories'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    note_id = Column(Integer, ForeignKey('notes.id'), nullable=False)
+
+    # Relacja z notatkami
+    note = relationship("Note", back_populates="categories")
+do tego dodac endpointy z tym zwiazane
+
+
+
+
