@@ -12,3 +12,6 @@ class User(Base):
     
     # Relacja do notatek
     notes = relationship("Note", back_populates="owner")
+    
+    # Relacja do kluczy API
+    api_keys = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")

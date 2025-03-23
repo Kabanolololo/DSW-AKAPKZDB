@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from models import User
 from schemas import UserCreate, UserUpdate
-from auth import hash_password
+from authorization.auth import hash_password
 
 # Funkcja do tworzenia nowego użytkownika
 def create_user(db: Session, user: UserCreate):
