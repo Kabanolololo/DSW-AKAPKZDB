@@ -1,29 +1,45 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from models import User
+from models import ApiKey
+from authorization.auth import generate_api_key
 from schemas import UserCreate, UserUpdate
-from authorization.auth import hash_password
+from authorization.auth import hash_password_sha256
 
-# Funkcja do tworzenia nowego użytkownika
+# Funkcja do tworzenia użytkownika
 def create_user(db: Session, user: UserCreate):
     existing_user = db.query(User).filter(User.email == user.email).first()
+    
+    # Sprawdzamy, czy użytkownik z takim emailem już istnieje
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Email already registered"
         )
     
-    hashed_password = hash_password(user.password)
+    # Haszowanie hasła
+    hashed_password = hash_password_sha256(user.password)
     db_user = User(email=user.email, password=hashed_password)
-
+    
     try:
+        # Dodajemy użytkownika do bazy
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+        
+        # Generowanie klucza API
+        api_key = generate_api_key()
+        db_api_key = ApiKey(key=api_key, user_id=db_user.id)
+        
+        # Dodajemy klucz API do bazy
+        db.add(db_api_key)
+        db.commit()
+        
+        # Zwracamy komunikat o powodzeniu
         return {"message": "Successfully created a user. Go to the login page and log in to your new account."}
     
     except Exception as e:
-        db.rollback()
+        db.rollback()  # Jeśli coś pójdzie nie tak, cofnij zmiany
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while creating the user"
