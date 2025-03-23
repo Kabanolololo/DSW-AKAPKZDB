@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from apis.notes import router as notes_router
+from apis.users import router as users_router
 from database import SessionLocal, engine
 import models as models
 

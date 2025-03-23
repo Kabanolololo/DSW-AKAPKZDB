@@ -31,11 +31,22 @@ def update_note(db: Session, note_id: int, user_id: int, note_update: NoteUpdate
     if note.user_id != user_id:
         raise HTTPException(status_code=403, detail="You are not the owner of this note")
 
-    note.title = note_update.title
-    note.content = note_update.content
-    db.commit()
-    db.refresh(note)
-    return note
+    updated = False  # Flaga informująca, czy coś zostało zmienione
+
+    if note_update.title is not None:
+        note.title = note_update.title
+        updated = True
+    if note_update.content is not None:
+        note.content = note_update.content
+        updated = True
+
+    if updated:
+        db.commit()
+        db.refresh(note)
+        
+        return {"message": "Note updated successfully"}
+    else:
+        raise HTTPException(status_code=400, detail="No data provided for update")
 
 # Funkcja do usunięcia notatki
 def delete_note(db: Session, note_id: int, user_id: int):

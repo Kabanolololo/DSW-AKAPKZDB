@@ -8,12 +8,22 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: constr(min_length=8)
+    
+class CreateResponse(BaseModel):
+    message: str
 
 class User(UserBase):
     id: int
 
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    password: Optional[constr(min_length=8)] = None
+    
     class Config:
         orm_mode = True
+
+class UpdateResponse(BaseModel):
+    message: str
 
 # Schematy notatek
 class NoteBase(BaseModel):
@@ -23,8 +33,13 @@ class NoteBase(BaseModel):
 class NoteCreate(NoteBase):
     pass
 
-class NoteUpdate(NoteBase):
-    pass
+class NoteUpdate(BaseModel):
+    title: Optional[str] = None
+    content: Optional[str] = None
+
+class NoteUpdateResponse(BaseModel):
+    message: str
+
 
 class Note(NoteBase):
     id: int
