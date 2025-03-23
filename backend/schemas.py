@@ -3,6 +3,10 @@ from typing import Optional
 from datetime import datetime
 
 # Schematy użytkownika
+class UserLogin(BaseModel):
+    email: EmailStr
+    password: str
+    
 class UserBase(BaseModel):
     email: EmailStr
 
