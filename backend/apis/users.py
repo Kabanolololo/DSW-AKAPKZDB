@@ -17,13 +17,15 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     except HTTPException as e:
         raise e
 
-# Endpoint do pobierania szczegółów użytkownika po ID
-@router.get("/users/{id}", response_model=schemas.User)
-def get_user(id: int, db: Session = Depends(get_db)):
-    user = crud.get_user(db, user_id=id)
+# Endpoint do sprawdzania szczegółów użytkownika
+@router.get("/users/me", response_model=schemas.User)
+def get_user_me(api_key: str, db: Session = Depends(get_db)):
+    # Sprawdzamy, czy klucz API jest prawidłowy
+    user = crud.get_user_by_api_key(db, api_key)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
+
 
 # Endpoint do aktualizacji danych użytkownika
 @router.put("/users/{id}", response_model=UpdateResponse)

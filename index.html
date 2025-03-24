@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Example</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Login</h2>
+        
+        <!-- Logowanie -->
+        <div class="input-group">
+            <input type="email" id="email" placeholder="Email" required />
+        </div>
+        <div class="input-group">
+            <input type="password" id="password" placeholder="Password" required />
+        </div>
+        <div class="input-group">
+            <button id="loginButton">Log in</button>
+        </div>
+        
+        <!-- Wylogowanie -->
+        <div class="input-group">
+            <button id="logoutButton" disabled>Log out</button>
+        </div>
+
+        <div class="message">
+            <p id="responseMessage"></p>
+            <p id="apiKeyMessage"></p>
+            <h3>User Details:</h3>
+            <p id="userId">User ID: </p>
+            <p id="userEmail">Email: </p>
+        </div>
+    </div>
+
+    <script>
+        const loginButton = document.getElementById("loginButton");
+        const logoutButton = document.getElementById("logoutButton");
+        const emailInput = document.getElementById("email");
+        const passwordInput = document.getElementById("password");
+        const responseMessage = document.getElementById("responseMessage");
+        const apiKeyMessage = document.getElementById("apiKeyMessage");
+
+        const userIdSpan = document.getElementById("userId");
+        const userEmailSpan = document.getElementById("userEmail");
+
+        let apiKey = null;
+
+        // Funkcja logowania
+        loginButton.addEventListener("click", async () => {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+
+            if (!email || !password) {
+                responseMessage.textContent = "Please fill out both fields.";
+                return;
+            }
+
+            // Wysyłamy żądanie logowania do API
+            try {
+                const response = await fetch("http://localhost:8000/login", { // Upewnij się, że endpoint jest poprawny
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ email, password }),
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+                    apiKey = data.api_key;
+
+                    // Wyświetlamy komunikat o sukcesie i API key
+                    responseMessage.textContent = "Login successful!";
+                    apiKeyMessage.textContent = `API Key: ${apiKey}`;
+
+                    // Zapisz API Key do localStorage
+                    localStorage.setItem("apiKey", apiKey);
+
+                    // Umożliwiamy wylogowanie
+                    loginButton.disabled = true;
+                    logoutButton.disabled = false;
+
+                    // Automatycznie pobieramy dane użytkownika
+                    await getUserDetails(); 
+                } else {
+                    const error = await response.json();
+                    responseMessage.textContent = error.detail || "Login failed.";
+                }
+            } catch (error) {
+                responseMessage.textContent = "An error occurred while logging in.";
+            }
+        });
+
+        // Funkcja wylogowania
+        logoutButton.addEventListener("click", async () => {
+            if (!apiKey) {
+                responseMessage.textContent = "You are not logged in.";
+                return;
+            }
+
+            // Wysyłamy żądanie wylogowania do API
+            try {
+                const response = await fetch("http://localhost:8000/logout", { // Endpoint logout
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ api_key: apiKey }),
+                });
+
+                if (response.status === 200) {
+                    const data = await response.json();
+
+                    // Zresetuj dane
+                    apiKey = null;
+                    responseMessage.textContent = "Logout successful!";
+                    apiKeyMessage.textContent = "";
+
+                    // Włącz ponownie logowanie i wyłącz wylogowanie
+                    loginButton.disabled = false;
+                    logoutButton.disabled = true;
+
+                    // Wyczyść dane użytkownika
+                    userIdSpan.textContent = "User ID: ";
+                    userEmailSpan.textContent = "Email: ";
+                } else {
+                    const error = await response.json();
+                    responseMessage.textContent = error.detail || "Logout failed.";
+                }
+            } catch (error) {
+                responseMessage.textContent = "An error occurred while logging out.";
+            }
+        });
+
+        // Funkcja pobierania szczegółów użytkownika
+        async function getUserDetails() {
+            const storedApiKey = localStorage.getItem("apiKey");
+
+            if (!storedApiKey) {
+                responseMessage.textContent = "You must be logged in to view user details.";
+                return;
+            }
+
+            try {
+                const response = await fetch(`http://localhost:8000/users/me?api_key=${storedApiKey}`, {
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                });
+
+                if (response.status === 200) {
+                    const userData = await response.json();
+                    // Wyświetlamy szczegóły użytkownika
+                    userIdSpan.textContent = `User ID: ${userData.id}`;
+                    userEmailSpan.textContent = `Email: ${userData.email}`;
+                } else {
+                    const error = await response.json();
+                    responseMessage.textContent = error.detail || "Unable to fetch user details.";
+                }
+            } catch (error) {
+                responseMessage.textContent = "An error occurred while fetching user details.";
+            }
+        }
+
+        // Sprawdzamy, czy użytkownik jest już zalogowany po załadowaniu strony
+        window.onload = () => {
+            const storedApiKey = localStorage.getItem("apiKey");
+            if (storedApiKey) {
+                apiKey = storedApiKey;
+                loginButton.disabled = true;
+                logoutButton.disabled = false;
+                getUserDetails(); // Pobieramy szczegóły użytkownika automatycznie
+            }
+        };
+    </script>
+</body>
+</html>

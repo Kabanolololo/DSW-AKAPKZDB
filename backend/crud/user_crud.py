@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from models import User
 from models import ApiKey
-from authorization.auth import generate_api_key
+from crud.auth_crud import get_user_by_api_key
 from schemas import UserCreate, UserUpdate
 from authorization.auth import hash_password_sha256
 
@@ -38,10 +38,17 @@ def create_user(db: Session, user: UserCreate):
         ) from e
 
 # Funkcja do wyświetlania konkretnego użytkownika        
-def get_user(db: Session, user_id: int):
-    user = db.query(User).filter(User.id == user_id).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+def get_user(db: Session, user_id: int, api_key: str) -> User:
+    # Weryfikujemy API Key i otrzymujemy użytkownika
+    user = get_user_by_api_key(db, api_key)
+
+    # Sprawdzamy, czy API Key jest powiązany z tym użytkownikiem
+    if user.id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this user"
+        )
+    
     return user
 
 # Funkcja do aktualizacji użytkownika

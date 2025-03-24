@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from schemas import UserLogin
+from schemas import UserLogin, LogoutRequest
 from models import User
 from models import ApiKey
 from apis.dependencies import get_db
@@ -34,9 +34,9 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     return {"api_key": api_key.key}
 
 @router.post("/logout")
-def logout(api_key: str, db: Session = Depends(get_db)):
+def logout(request: LogoutRequest, db: Session = Depends(get_db)):
     # Sprawdzamy, czy klucz API istnieje w bazie
-    db_api_key = db.query(ApiKey).filter(ApiKey.key == api_key).first()
+    db_api_key = db.query(ApiKey).filter(ApiKey.key == request.api_key).first()
     
     if not db_api_key:
         raise HTTPException(

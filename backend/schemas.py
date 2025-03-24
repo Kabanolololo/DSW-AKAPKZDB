@@ -6,6 +6,9 @@ from datetime import datetime
 class UserLogin(BaseModel):
     email: EmailStr
     password: str
+
+class LogoutRequest(BaseModel):
+    api_key: str
     
 class UserBase(BaseModel):
     email: EmailStr
