@@ -27,15 +27,7 @@ def create_user(db: Session, user: UserCreate):
         db.commit()
         db.refresh(db_user)
         
-        # Generowanie klucza API
-        api_key = generate_api_key()
-        db_api_key = ApiKey(key=api_key, user_id=db_user.id)
-        
-        # Dodajemy klucz API do bazy
-        db.add(db_api_key)
-        db.commit()
-        
-        # Zwracamy komunikat o powodzeniu
+        # Zwracamy komunikat o powodzeniu (BEZ tworzenia API Key)
         return {"message": "Successfully created a user. Go to the login page and log in to your new account."}
     
     except Exception as e:
@@ -64,7 +56,7 @@ def update_user(db: Session, user_id: int, user_update: UserUpdate):
         user.email = user_update.email
         updated_fields.append("email")
     if user_update.password:
-        user.password = hash_password(user_update.password)
+        user.password = hash_password_sha256(user_update.password)
         updated_fields.append("password")
 
     if updated_fields:
