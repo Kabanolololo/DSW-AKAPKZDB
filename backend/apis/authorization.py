@@ -30,8 +30,15 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(api_key)
 
-    # Zwracamy API Key (nowy lub już istniejący)
-    return {"api_key": api_key.key}
+    # Zwracamy zarówno API Key, jak i dane użytkownika
+    return {
+        "api_key": api_key.key,
+        "user": {
+            "id": db_user.id,
+            "email": db_user.email,
+            "nick": db_user.nick
+        }
+    }
 
 @router.post("/logout")
 def logout(request: LogoutRequest, db: Session = Depends(get_db)):

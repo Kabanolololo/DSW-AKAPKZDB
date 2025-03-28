@@ -15,15 +15,14 @@ def verify_api_key(db: Session, api_key: str) -> ApiKey:
     
     return db_api_key
 
-# Funckja do wyświetlania szczegółów użytkownika
-def get_user_by_api_key(db: Session, api_key: str) -> User:
-    # Weryfikujemy klucz API
+# Funkcja sprawdzająca, czy API Key jest przypisany do użytkownika
+def check_api_key_permissions(db: Session, api_key: str, user_id: int) -> bool:
     db_api_key = verify_api_key(db, api_key)
     
-    # Pobieramy użytkownika powiązanego z tym API Key
-    user = db.query(User).filter(User.id == db_api_key.user_id).first()
+    if db_api_key.user_id != user_id:
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to access this user"
+        )
     
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-
-    return user
+    return True

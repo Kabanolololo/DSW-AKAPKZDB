@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query,Header
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import crud.user_crud as crud
@@ -18,19 +18,25 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise e
 
 # Endpoint do sprawdzania szczegółów użytkownika
-@router.get("/users/me", response_model=schemas.User)
-def get_user_me(api_key: str, db: Session = Depends(get_db)):
-    # Sprawdzamy, czy klucz API jest prawidłowy
-    user = crud.get_user_by_api_key(db, api_key)
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+@router.get("/users/{user_id}", response_model=schemas.User)
+def read_user(user_id: int, api_key: str, db: Session = Depends(get_db)):
+    user = crud.get_user(db=db, user_id=user_id, api_key=api_key)
     return user
 
+# Endpoint do aktualizacji użytkownika
+@router.put("/users/{user_id}", response_model=UpdateResponse)
+def update_user(user_id: int, user_update: schemas.UserUpdate, api_key: str, db: Session = Depends(get_db)):
+    try:
+        # Wywołanie funkcji do aktualizacji użytkownika z `crud.py`
+        return crud.update_user(db=db, user_id=user_id, api_key=api_key, user_update=user_update)
+    except HTTPException as e:
+        raise e
 
-# Endpoint do aktualizacji danych użytkownika
-@router.put("/users/{id}", response_model=UpdateResponse)
-def update_user(id: int, user_update: schemas.UserUpdate, db: Session = Depends(get_db)):
-    updated_user = crud.update_user(db, user_id=id, user_update=user_update)
-    if "message" in updated_user:
-        return updated_user  # Jeśli zwrócono komunikat, zwróć go w odpowiedzi
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+# Endpoin do wyświetlania nicku
+@router.get("/users/{user_id}/nick")
+def read_user_nick(user_id: int, api_key: str, db: Session = Depends(get_db)):
+    # Wywołanie funkcji z CRUD, aby pobrać nick użytkownika
+    user_nick = crud.get_user_nick(db=db, user_id=user_id, api_key=api_key)
+    if not user_nick:
+        raise HTTPException(status_code=404, detail="Nick not found")
+    return {"nick": user_nick}
