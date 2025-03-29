@@ -17,11 +17,20 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
     except HTTPException as e:
         raise e
 
-# Endpoint do sprawdzania szczegółów użytkownika
+# Endpoint do wyświetlania szczegółów użytkownika
 @router.get("/users/{user_id}", response_model=schemas.User)
 def read_user(user_id: int, api_key: str, db: Session = Depends(get_db)):
     user = crud.get_user(db=db, user_id=user_id, api_key=api_key)
     return user
+
+# Endpoint do wyświetlania nicku
+@router.get("/users/{user_id}/nick")
+def read_user_nick(user_id: int, api_key: str, db: Session = Depends(get_db)):
+    # Wywołanie funkcji z CRUD, aby pobrać nick użytkownika
+    user_nick = crud.get_user_nick(db=db, user_id=user_id, api_key=api_key)
+    if not user_nick:
+        raise HTTPException(status_code=404, detail="Nick not found")
+    return {"nick": user_nick}
 
 # Endpoint do aktualizacji użytkownika
 @router.put("/users/{user_id}", response_model=UpdateResponse)
@@ -31,12 +40,3 @@ def update_user(user_id: int, user_update: schemas.UserUpdate, api_key: str, db:
         return crud.update_user(db=db, user_id=user_id, api_key=api_key, user_update=user_update)
     except HTTPException as e:
         raise e
-
-# Endpoin do wyświetlania nicku
-@router.get("/users/{user_id}/nick")
-def read_user_nick(user_id: int, api_key: str, db: Session = Depends(get_db)):
-    # Wywołanie funkcji z CRUD, aby pobrać nick użytkownika
-    user_nick = crud.get_user_nick(db=db, user_id=user_id, api_key=api_key)
-    if not user_nick:
-        raise HTTPException(status_code=404, detail="Nick not found")
-    return {"nick": user_nick}

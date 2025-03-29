@@ -8,6 +8,7 @@ from authorization.auth import hash_password_sha256,generate_api_key
 
 router = APIRouter()
 
+# Endpoint służący do logowania użytkownika
 @router.post("/login")
 def login(user: UserLogin, db: Session = Depends(get_db)):
     # Sprawdzamy, czy użytkownik istnieje w bazie danych
@@ -40,6 +41,7 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         }
     }
 
+# Endpoint służący do wylogowania użytkownika
 @router.post("/logout")
 def logout(request: LogoutRequest, db: Session = Depends(get_db)):
     # Sprawdzamy, czy klucz API istnieje w bazie
