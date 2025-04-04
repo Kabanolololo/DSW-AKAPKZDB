@@ -1,18 +1,10 @@
 python -m http.server 8080
 uvicorn main:app --reload
 
-logujemy sie tylko mailem!!!!!!
-
-
-PIATEK:
-dokumentacje napisac do users oraz dodac
-
-
-NIEDZIELA:
+SOBOTA:
 Dokonczyc notes endpointy + dokumentacja notes
 
-
-OSTATECZNE RZECZY DO WYKONANIA: + rozrysowac jak wyglada testowo dla przema baza danych
+NIEDZIELA I PRZYSZLY TYDZIEN: + rozrysowac jak wyglada  dla przema baza danych
 DODAC DO FILTORWANIA DANYCH:
 # Model kategorie
 class Categories(Base):
