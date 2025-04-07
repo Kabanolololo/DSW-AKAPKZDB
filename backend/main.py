@@ -2,6 +2,7 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from apis.notes import router as notes_router
 from apis.users import router as users_router
+from apis.tag import router as tag_router
 from apis.authorization import router as login_router
 from database import SessionLocal, engine
 import models as models
@@ -32,3 +33,4 @@ app.add_middleware(
 app.include_router(users_router)
 app.include_router(notes_router)
 app.include_router(login_router)
+app.include_router(tag_router)
