@@ -43,6 +43,7 @@ def create_note(db: Session, note: NoteCreate, user_id: int, api_key: str):
     
     return db_note
 
+# Funkcja do aktualizacji notatki
 def update_note(db: Session, note_id: int, user_id: int, api_key: str, note_update: NoteUpdate):
     # Sprawdzamy uprawnienia użytkownika za pomocą API Key
     check_api_key_permissions(db, api_key, user_id)
