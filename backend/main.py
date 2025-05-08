@@ -30,7 +30,7 @@ app.add_middleware(
 )
 
 # Rejestrujemy routers dla użytkowników i notatek
-app.include_router(users_router)
-app.include_router(notes_router)
-app.include_router(login_router)
-app.include_router(tag_router)
+app.include_router(users_router, tags=["users"])
+app.include_router(notes_router,  tags=["notes"])
+app.include_router(login_router,  tags=["login"])
+app.include_router(tag_router,  tags=["tag"])
