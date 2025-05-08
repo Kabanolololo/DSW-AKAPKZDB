@@ -16,3 +16,6 @@ class Note(Base):
 
     # Relacja z użytkownikiem
     owner = relationship("User", back_populates="notes")
+
+    # Relacja z tagami (One to Many)
+    tags = relationship("Tag", back_populates="note", cascade="all, delete-orphan")

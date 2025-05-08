@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, LargeBinary
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -8,7 +8,12 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String, unique=True, index=True, nullable=False)
+    nick = Column(String, nullable=True)
+
     password = Column(String, nullable=False)
     
     # Relacja do notatek
     notes = relationship("Note", back_populates="owner")
+    
+    # Relacja do kluczy API
+    api_keys = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")
