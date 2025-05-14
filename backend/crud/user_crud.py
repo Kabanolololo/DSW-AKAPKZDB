@@ -18,8 +18,12 @@ def create_user(db: Session, user: UserCreate):
     # Haszowanie hasła
     hashed_password = hash_password_sha256(user.password)
     
+    # To lower case email
+    email_fix = user.email
+    new_email=email_fix.lower()
+    
     # Tworzenie nowego użytkownika
-    db_user = User(email=user.email, password=hashed_password, nick=user.nick)
+    db_user = User(email=new_email, password=hashed_password, nick=user.nick)
     
     try:
         db.add(db_user)
