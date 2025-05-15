@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models import ApiKey, User
+from models import ApiKey
 from fastapi import HTTPException, status
 
 # Funkcja do weryfikowania klucza API

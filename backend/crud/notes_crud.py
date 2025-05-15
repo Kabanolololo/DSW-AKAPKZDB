@@ -1,8 +1,8 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from models import Note
-from schemas import NoteCreate, NoteUpdate
-from crud.auth_crud import check_api_key_permissions
+from schemas.notes_schema import NoteCreate, NoteUpdate
+from crud.API_Key_crud import check_api_key_permissions
 
 # Funkcja do wyświetlania wszystkich notatek dla konkretnego użytkownika
 def get_notes(db: Session, user_id: int, api_key: str):

@@ -1,9 +1,9 @@
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 from models import User
-from schemas import UserCreate, UserUpdate
-from authorization.auth import hash_password_sha256
-from crud.auth_crud import check_api_key_permissions
+from schemas.users_schema import UserCreate, UserUpdate
+from utils.hash import hash_password_sha256
+from crud.API_Key_crud import check_api_key_permissions
 
 # Funkcja do tworzenia użytkownika
 def create_user(db: Session, user: UserCreate):
@@ -18,7 +18,7 @@ def create_user(db: Session, user: UserCreate):
     # Haszowanie hasła
     hashed_password = hash_password_sha256(user.password)
     
-    # To lower case email
+    # Małe znaki dla emaila
     email_fix = user.email
     new_email=email_fix.lower()
     
@@ -73,7 +73,11 @@ def update_user(db: Session, user_id: int, api_key: str, user_update: UserUpdate
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Email already registered"
             )
-        db_user.email = user_update.email
+        # Małe znaki dla emaila
+        email_fix = user_update.email
+        new_email=email_fix.lower()
+        
+        db_user.email = new_email
         updated_fields.append("email")
 
     # Sprawdzamy i aktualizujemy hasła
@@ -107,3 +111,17 @@ def get_user_nick(db: Session, user_id: int, api_key: str):
         raise HTTPException(status_code=404, detail="User not found")
     
     return user.nick
+
+# Funkcja do usuwania użytkownika
+def delete_user(db: Session, user_id: int, api_key: str):
+     # Sprawdzamy uprawnienia użytkownika za pomocą API Key
+    check_api_key_permissions(db, api_key, user_id)
+    
+    # Pobieramy dane użytkownika:
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    db.delete(user)
+    db.commit()
+    return {"message": "Successfully deleted your account"}

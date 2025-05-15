@@ -13,7 +13,8 @@ class User(Base):
     password = Column(String, nullable=False)
     
     # Relacja do notatek
-    notes = relationship("Note", back_populates="owner")
+    notes = relationship("Note", back_populates="owner", cascade="all, delete-orphan")
+
     
     # Relacja do kluczy API
     api_keys = relationship("ApiKey", back_populates="user", cascade="all, delete-orphan")

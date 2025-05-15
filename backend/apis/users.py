@@ -2,15 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, status, Query,Header
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 import crud.user_crud as crud
-import schemas
-from schemas import UpdateResponse, CreateResponse
+from schemas.users_schema import UpdateResponse, CreateResponse,UserCreate,User,UserUpdate
 from apis.dependencies import get_db
 
 router = APIRouter()
 
 # Endpoint do tworzenia użytkownika
 @router.post("/users/", response_model=CreateResponse, status_code=status.HTTP_201_CREATED)
-def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
+def create_user(user: UserCreate, db: Session = Depends(get_db)):
     try:
         # Wywołanie funkcji do tworzenia użytkownika z `crud.py`
         return crud.create_user(db=db, user=user)
@@ -18,7 +17,7 @@ def create_user(user: schemas.UserCreate, db: Session = Depends(get_db)):
         raise e
 
 # Endpoint do wyświetlania szczegółów użytkownika
-@router.get("/users/{user_id}", response_model=schemas.User)
+@router.get("/users/{user_id}", response_model=User)
 def read_user(user_id: int, api_key: str, db: Session = Depends(get_db)):
     user = crud.get_user(db=db, user_id=user_id, api_key=api_key)
     return user
@@ -34,9 +33,14 @@ def read_user_nick(user_id: int, api_key: str, db: Session = Depends(get_db)):
 
 # Endpoint do aktualizacji użytkownika
 @router.put("/users/{user_id}", response_model=UpdateResponse)
-def update_user(user_id: int, user_update: schemas.UserUpdate, api_key: str, db: Session = Depends(get_db)):
+def update_user(user_id: int, user_update: UserUpdate, api_key: str, db: Session = Depends(get_db)):
     try:
         # Wywołanie funkcji do aktualizacji użytkownika z `crud.py`
         return crud.update_user(db=db, user_id=user_id, api_key=api_key, user_update=user_update)
     except HTTPException as e:
         raise e
+
+# Endpoint do usuwania użytkownika
+@router.delete("/users", response_model=CreateResponse)
+def delete_user_endpoint(user_id: int, api_key:str,db: Session = Depends(get_db)):
+    return crud.delete_user(db=db,user_id=user_id,api_key=api_key)

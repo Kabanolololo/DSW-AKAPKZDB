@@ -2,8 +2,8 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from models.tag_model import Tag
 from models.note_model import Note
-from schemas import TagCreate, TagRead, TagUpdate, NoteUpdateResponse
-from crud.auth_crud import check_api_key_permissions
+from schemas.tags_schema import TagCreate, TagRead, TagUpdate
+from crud.API_Key_crud import check_api_key_permissions
 
 # Funkcja do wyświetlenia tagów dla konkretnej notatki użytkownika
 def get_tags_for_note(db: Session, note_id: int, user_id: int, api_key: str):
