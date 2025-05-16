@@ -10,6 +10,8 @@ class Tag(Base):
     name = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     note_id = Column(Integer, ForeignKey('notes.id'), nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 
     # Relacja z notatkami
     note = relationship("Note", back_populates="tags")

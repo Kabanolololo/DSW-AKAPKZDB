@@ -19,3 +19,4 @@ class TagRead(BaseModel):
 class TagUpdate(BaseModel):
     name: Optional[str] = None
     note_id: Optional[int] = None
+    updated_at: datetime

@@ -4,6 +4,7 @@ from apis.notes import router as notes_router
 from apis.users import router as users_router
 from apis.tag import router as tag_router
 from apis.authorization import router as login_router
+from apis.status import router as status_router
 from database import SessionLocal, engine
 import models as models
 
@@ -35,3 +36,4 @@ app.include_router(users_router, tags=["users"])
 app.include_router(notes_router,  tags=["notes"])
 app.include_router(login_router,  tags=["login"])
 app.include_router(tag_router,  tags=["tag"])
+app.include_router(status_router,  tags=["status"])
